@@ -5,6 +5,7 @@ import os
 from discord.ext import tasks
 from discord.ext import commands
 import pandas as pd
+import config
 
 
 bot = commands.Bot(command_prefix='.')
@@ -21,4 +22,4 @@ for cog in cogs:
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
     
-bot.run("ODMxODk0MjYzMjU1MjY5NDE3.GfgSKR.Ehxu3UTwuPsGyQNiAp1wF8X3tVf3oaA-0L3Y3M")
+bot.run(config.bot_token)
