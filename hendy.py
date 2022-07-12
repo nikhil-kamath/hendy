@@ -15,7 +15,7 @@ cogs = ['Admins',
         'Statements',
         'Youtube']
 for cog in cogs:
-    bot.load_extension(cog)
+    bot.load_extension(f'cogs.{cog}')
 
 
 @bot.event
