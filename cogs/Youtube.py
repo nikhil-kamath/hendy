@@ -1,13 +1,12 @@
 import asyncio
-import threading
 import discord
 from discord.ext import commands, tasks
 import os
 import random
 import pandas as pd
-from ytcomments import process_youtube_comments
+from utilities.ytcomments import process_youtube_comments
 from googleapiclient.discovery import build
-import Comments
+import utilities.Comments as Comments
 import config
 
 
@@ -22,7 +21,6 @@ class Youtube(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
         self.comments = pd.DataFrame()
-        
         
         self.api_key = config.api_key
         self.res_folder = './resources'
@@ -50,11 +48,10 @@ class Youtube(commands.Cog):
     @commands.command()
     async def searchyt(self, ctx, *, query):
         await ctx.send(f"searching youtube for {query}") # send confirmation to discord channel
-        
         asyncio.create_task(self.search_yt_helper(query, ctx))
         
 
-    '''processes youtube comments in other event loop'''
+    '''processes youtube comments in other task'''
     async def search_yt_helper(self, query, confirmation_ctx):
         # create call to youtube api
         yt = build('youtube', 'v3', developerKey=self.api_key)
@@ -74,8 +71,8 @@ class Youtube(commands.Cog):
         print(f"added {n} comments from query")
 
         # create output message using the video titles returned by Comments package
-        output_message = f"added {len(new_comments)} comments from search '{query}'.\n"
-        output_message += "videos include: \n"
+        output_message = f"**added {len(new_comments)} comments from search '{query}'.**\n"
+        output_message += "**videos include:** \n"
         for title in video_titles:
             output_message += title + "\n"
         

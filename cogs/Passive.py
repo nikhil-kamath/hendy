@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 import os
 import json
 import random
-import Utilities
+import utilities.Utilities as Utilities
 
 '''
 Class which takes care of repeated actions: 

@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands, tasks
 import os
 import random
-import Utilities
+import utilities.Utilities as Utilities
 
 '''
 Class to handle basic statements, insults, and jokes

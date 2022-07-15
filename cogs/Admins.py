@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import re
 import os
-import Utilities
+import utilities.Utilities as Utilities
 
 '''Class to keep track of 'authorized' users'''
 class Admins(commands.Cog):
