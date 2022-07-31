@@ -13,7 +13,9 @@ cogs = ['Admins',
         'Misc',
         'Passive',
         'Statements',
-        'Youtube']
+        'Youtube', 
+        'Database',
+        ]
 for cog in cogs:
     bot.load_extension("cogs.{}".format(cog))
 
