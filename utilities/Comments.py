@@ -3,7 +3,7 @@ import asyncio
 import time
 import config
 
-api_key = config.api_key
+api_key = config.youtube_api_key
 
 
 async def youtube_get_comments(youtube, video_id, comments=None, token='', scrolls=5):

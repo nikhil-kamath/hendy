@@ -36,8 +36,8 @@ class Passive(commands.Cog):
     async def toggle(self, ctx):
         if self.require_auth:
             admins = self.bot.get_cog('Admins')
-            if admins is not None and not admins.is_authorized(ctx.author.id):
-                admins.unauthorized_message(ctx, "toggle")
+            if admins is not None and not await admins.is_authorized(ctx.author.id):
+                await admins.unauthorized_message(ctx, "toggle")
                 return
 
         self.loop_channel = ctx
@@ -47,6 +47,17 @@ class Passive(commands.Cog):
         else:
             await ctx.send("me no longer looping")
     
+    '''toggle responses'''
+    @commands.command()
+    async def toggleresponse(self, ctx):
+        if self.require_auth:
+            admins = self.bot.get_cog("Admins")
+            if admins is not None and not await admins.is_authorized(ctx.author.id):
+                await admins.unauthorized_message(ctx, "toggleresponse")
+                return
+        
+        self.response_on = not self.response_on
+
     '''random chance to respond to user's messages'''
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -55,7 +66,7 @@ class Passive(commands.Cog):
 
         if self.response_on and random.randint(1, 100) <= self.response_chance:
             statements = self.bot.get_cog("Statements")
-            statements.speak(message.channel)
+            await statements.speak(message.channel)
 
     '''looping with object's loop_time'''
     @tasks.loop(seconds=1)
@@ -80,6 +91,7 @@ class Passive(commands.Cog):
     @commands.command()
     async def looptime(self, ctx, new):
         self.loop_time = int(new)
+        self.timer = self.loop_time
         self.save()
     
     '''save object data to json file'''

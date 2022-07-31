@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 import os
 import random
 import pandas as pd
-from utilities.ytcomments import process_youtube_comments
+# from utilities.ytcomments import process_youtube_comments
 from googleapiclient.discovery import build
 import utilities.Comments as Comments
 import config
@@ -22,7 +22,7 @@ class Youtube(commands.Cog):
         self.bot = bot
         self.comments = pd.DataFrame()
         
-        self.api_key = config.api_key
+        self.api_key = config.youtube_api_key
         self.res_folder = './resources'
         self.yt_folder = "yt"
         files = [f for f in os.listdir(os.path.join(self.res_folder, self.yt_folder)) if os.path.isfile(os.path.join(self.res_folder, self.yt_folder, f))]
@@ -35,13 +35,13 @@ class Youtube(commands.Cog):
     async def comment(self, ctx):
         await ctx.send(str(self.comments['comment'][random.randrange(0, self.comments.shape[0])]))
     
-    '''scrape comments from input youtube link, create new df and append to comments'''
-    @commands.command()
-    async def addyt(self, ctx, link):
-        await ctx.send("collecting comments from youtube link")
-        temp, title = process_youtube_comments(link)        
-        self.comments = pd.concat([self.comments, temp], ignore_index=True)
-        await ctx.send(f"added {len(temp)} comments from {title}")
+    # '''scrape comments from input youtube link, create new df and append to comments'''
+    # @commands.command()
+    # async def addyt(self, ctx, link):
+    #     await ctx.send("collecting comments from youtube link")
+    #     temp, title = process_youtube_comments(link)        
+    #     self.comments = pd.concat([self.comments, temp], ignore_index=True)
+    #     await ctx.send(f"added {len(temp)} comments from {title}")
         
     '''use a youtube search to find videos with a given query and take comments from them
     creates new event loop so that bot is still running during query'''
