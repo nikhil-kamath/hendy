@@ -2,6 +2,7 @@ from typing import List, Tuple
 import mysql.connector
 from pypika import Query, Column, Table
 import logging
+import pandas as pd
 
 default_configuration = {
     'user': 'root',
@@ -44,7 +45,7 @@ def create_table(table_name: str, database: str, data_types: List[Tuple[str, int
         connection.close()
         logging.info("closed sql connection")
 
-def create_entry(table_name: str, database: str, data: dict, configuration=None):
+def create_entry(table_name: str, database: str, data: dict | pd.Series, configuration=None):
     """create an entry in a table
 
     Args:
@@ -53,9 +54,13 @@ def create_entry(table_name: str, database: str, data: dict, configuration=None)
         data (_type_): data to create (do not put value for id)
         configuration (_type_, optional): sql connection configuration.
     """
+    print(type(data))
     if configuration is None:
         configuration = default_configuration
     configuration['database'] = database
+    
+    if isinstance(data, pd.Series):
+        data = data.to_dict()
     
     table = Table(table_name)
     column_names = data.keys()
@@ -80,5 +85,52 @@ def create_entry(table_name: str, database: str, data: dict, configuration=None)
         connection.close()
         logging.info("sql connection closed")
         
+def random_rows(table_name: str, database: str, num=1, configuration=None):
+    if configuration is None:
+        configuration = default_configuration
+    configuration["database"] = database
     
+    query = f"SELECT * FROM {table_name} \
+            ORDER BY RAND() \
+            LIMIT {num}"
+    
+    connection = cursor = None
+    result = None
+    try:
+        connection = mysql.connector.connect(**configuration)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(query)
+        result = cursor.fetchone()
+    except mysql.connector.Error as error:
+        logging.error(f"failed to get random column: {error}")
+    finally:
+        cursor.close()
+        connection.close()
+        logging.info("sql connection closed")
+        return result
+
+def get_row(table_name: str, database: str, column: str, data: str, configuration=None):
+    if configuration is None:
+        configuration = default_configuration
+    configuration["database"] = database
+    
+    query = f'SELECT * FROM {table_name} \
+        WHERE {column}="{data}" \
+        LIMIT 1'
+    
+    connection = cursor = None
+    result = None
+    try:
+        connection = mysql.connector.connect(**configuration)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(query)
+        result = cursor.fetchone()
+    except mysql.connector.Error as error:
+        logging.error(f"failed to get column: {error}")
+    finally:
+        cursor.close()
+        connection.close()
+        logging.info("sql connection closed")
+        return result
+
     
