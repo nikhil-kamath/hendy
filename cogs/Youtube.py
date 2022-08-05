@@ -11,6 +11,7 @@ import utilities.Comments as Comments
 import config
 from threading import Thread
 import concurrent.futures
+from utilities.Utilities import save_dataframe_as_pickle
 
 '''
 Class which allows users to add comments from a youtube video
@@ -31,6 +32,7 @@ class Youtube(commands.Cog):
         for f in files:
             temp = pd.read_pickle(os.path.join(self.res_folder, self.yt_folder, f))
             self.comments = pd.concat([self.comments, temp], ignore_index=True)
+        print(self.comments.sample(10))
     
     '''send random message from comments DataFrame'''
     @commands.command(aliases=['y'])
@@ -50,62 +52,23 @@ class Youtube(commands.Cog):
     @commands.command()
     async def searchyt(self, ctx, *, query):
         loop = asyncio.get_running_loop()
+        
+        # run in another threadpool
         with concurrent.futures.ThreadPoolExecutor() as pool:
             await ctx.send(f"searching youtube for *{query}*")
             
+            # sync call to get comments dataframe
             new_comments = await loop.run_in_executor(pool, self.find_comments, query)
             
             output_message = f"**added {len(new_comments)} comments from search '{query}'.**\n"
             output_message += "**videos include:**\n"
+            # create output message using unique video titles and their corresponding channels
             for _, row in new_comments.groupby("video", as_index=False).first().iterrows():
                 output_message += row["channel"] + ": " + row["video"] + "\n"
             
-            # self.comments = pd.concat([self.comments, new_comments], ignore_index=True)
-            print(new_comments.head())
-            print(new_comments.tail())
+            self.comments = pd.concat([self.comments, new_comments], ignore_index=True)
+            save_dataframe_as_pickle("./resources/yt", f"query.{query}{random.randrange(100000, 1000000)}.pkl", new_comments)
             await ctx.send(output_message)
-            
-        
-
-    '''processes youtube comments in other task'''
-    async def search_yt_helper(self, ctx, query):     
-        # await asyncio.sleep(30) # this version works so theres an issue with the Comments module eating the loop
-        # await confirmation_ctx.send(f"got results from {query}")
-        # return   
-        # get video ids and titles from Comments package
-        await ctx.send(f"searching youtube for {query}") # send confirmation to discord channel
-        video_ids, video_titles, channels = await Comments.youtube_search_keyword(self.api_key, query, max_results=5)
-        n = 0
-        new_comments = pd.DataFrame()
-        logging.info(f"got {len(video_ids)} results")
-        # for each video, get comments from id and add them to new_comments dataframe
-        for v_id in video_ids:
-            c = await Comments.youtube_get_comments(self.api_key, v_id, scrolls=3)
-            n += len(c)
-            temp = pd.DataFrame(c, columns=['comment'])
-            new_comments = pd.concat([new_comments, temp], ignore_index=True)
-            
-        print(f"added {n} comments from query")
-
-        # create output message using the video titles returned by Comments package
-        output_message = f"**added {len(new_comments)} comments from search '{query}'.**\n"
-        output_message += "**videos include:** \n"
-        for channel, title in zip(channels, video_titles):
-            output_message += channel + ": " + title + "\n"
-        
-        # add new comments to Youtube cog's comments df
-        self.comments = pd.concat([new_comments, self.comments], ignore_index=True)
-        
-        # save new comments to pickle file
-        outdir = './resources/yt'
-        if not os.path.exists(outdir):
-            os.mkdir(outdir)
-            
-        filename = "query." + query + ".pkl"
-        new_comments.to_pickle(os.path.join(outdir, filename))
-        
-        # send confirmation in original discord channel
-        await ctx.send(output_message)
 
 
     def find_comments(self, query: str) -> pd.DataFrame:
