@@ -32,20 +32,15 @@ class Youtube(commands.Cog):
         for f in files:
             temp = pd.read_pickle(os.path.join(self.res_folder, self.yt_folder, f))
             self.comments = pd.concat([self.comments, temp], ignore_index=True)
-        print(self.comments.sample(10))
-    
+        
+        if len(self.comments) > 10:    
+            print(self.comments.sample(10))
+        
     '''send random message from comments DataFrame'''
     @commands.command(aliases=['y'])
     async def comment(self, ctx):
         await ctx.send(str(self.comments['comment'][random.randrange(0, self.comments.shape[0])]))
     
-    # '''scrape comments from input youtube link, create new df and append to comments'''
-    # @commands.command()
-    # async def addyt(self, ctx, link):
-    #     await ctx.send("collecting comments from youtube link")
-    #     temp, title = process_youtube_comments(link)        
-    #     self.comments = pd.concat([self.comments, temp], ignore_index=True)
-    #     await ctx.send(f"added {len(temp)} comments from {title}")
         
     '''use a youtube search to find videos with a given query and take comments from them
     creates new event loop so that bot is still running dlduring query'''
@@ -64,7 +59,7 @@ class Youtube(commands.Cog):
             output_message += "**videos include:**\n"
             # create output message using unique video titles and their corresponding channels
             for _, row in new_comments.groupby("video", as_index=False).first().iterrows():
-                output_message += row["channel"] + ": " + row["video"] + "\n"
+                output_message += f"**{row['channel']}**: {row['video'][:30]}...\n"
             
             self.comments = pd.concat([self.comments, new_comments], ignore_index=True)
             save_dataframe_as_pickle("./resources/yt", f"query.{query}{random.randrange(100000, 1000000)}.pkl", new_comments)

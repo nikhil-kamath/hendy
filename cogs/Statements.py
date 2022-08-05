@@ -80,9 +80,11 @@ class Statements(commands.Cog):
     @commands.command(aliases=['j'])
     async def joke(self, ctx):
         j = random.choice(self.jokes)
+        index = -1
         if index := j.find("?") != -1 and index != len(j) -1:
             j = f"{j[:index+1]}||{j[index+1:]}||"
         await(ctx.send(j))
+
         
     '''insults a given name'''
     @commands.command(aliases=['i'])
