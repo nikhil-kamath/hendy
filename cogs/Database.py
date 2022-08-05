@@ -1,7 +1,9 @@
+from random import randint
 import discord
 from discord.ext import commands, tasks
 import mysql.connector
 from mysql.connector import Error
+from pypika import Query, Column, Table
 
 class Database(commands.Cog):
     """class to handle storing data in databases
@@ -16,7 +18,7 @@ class Database(commands.Cog):
         cursor = None
         
         try:
-            connection_configuration = config = {
+            connection_configuration = {
                 'user': 'root',
                 'password': 'root',
                 'host': 'localhost',
@@ -27,10 +29,12 @@ class Database(commands.Cog):
             connection = mysql.connector.connect(**connection_configuration)
 
             # sql query to create a table with columns representing message id, user, and message
-            create_table_query =  f'CREATE TABLE DB_{guild} ( \
+            create_table_query = f'CREATE TABLE DB_{guild} ( \
                 Id int(11) NOT NULL AUTO_INCREMENT, \
                 User varchar(250) NOT NULL, \
-                Message varchar(5000) NOT NULL, \
+                Title varchar(5000) NOT NULL, \
+                Comment varchar(5000) NOT NULL, \
+                Channel varchar(1000) NOT NULL, \
                 PRIMARY KEY (Id))'
 
             cursor = connection.cursor(dictionary=True)
@@ -42,7 +46,20 @@ class Database(commands.Cog):
  
         finally:
             if connection and connection.is_connected():
-                insert_query = f'INSERT INTO DB_{guild} (User, Message) VALUES ("{ctx.author}", "{data}")'
+                test_title = f"hendy video {randint(0, 100)}"
+                test_comment = f"i love this video {randint(0, 100)}"
+                test_channel = f"hendy channel {randint(0, 100)}"
+                
+                comment_table = Table(f"DB_{guild}")
+                insert_query = Query \
+                    .into(comment_table) \
+                    .columns("User", "Title", "Comment", "Channel") \
+                    .insert(str(ctx.author), test_title, test_comment, test_channel) \
+                    .get_sql(quote_char=None)
+                
+                print("_________________")
+                print(insert_query)
+                
                 cursor.execute(insert_query)
                 connection.commit()
                 

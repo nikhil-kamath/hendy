@@ -19,7 +19,6 @@ cogs = ['Admins',
 for cog in cogs:
     bot.load_extension("cogs.{}".format(cog))
 
-
 @bot.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
