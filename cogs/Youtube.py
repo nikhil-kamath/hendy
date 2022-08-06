@@ -3,17 +3,14 @@ import concurrent.futures
 import logging
 import os
 import random
-from threading import Thread
 
 import config
 import discord
 import pandas as pd
 import utilities.Comments as Comments
 from discord.ext import commands, tasks
-# from utilities.ytcomments import process_youtube_comments
-from googleapiclient.discovery import build
+from utilities.Database import create_entry, create_table, get_row, random_rows
 from utilities.Utilities import save_dataframe_as_pickle
-from utilities.Database import create_table, create_entry, random_rows, get_row
 
 '''
 Class which allows users to add comments from a youtube video
@@ -73,6 +70,8 @@ class Youtube(commands.Cog):
             await ctx.send(output['comment'])
         else:
             logging.warning("sql did not return a result, defaulting to pkl backups")
+            await ctx.send("i didn't find any comments stored in your server's database, add some with **.searchyt [query]**\n \
+                but here's one from the backup stash: ")
             await ctx.send(str(self.comments['comment'][random.randrange(0, self.comments.shape[0])]))
     
         
@@ -126,5 +125,5 @@ class Youtube(commands.Cog):
             
     
     
-def setup(bot):  # sourcery skip: instance-method-first-arg-name
+def setup(bot):  
     bot.add_cog(Youtube(bot))
