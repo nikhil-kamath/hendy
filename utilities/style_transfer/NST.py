@@ -1,3 +1,4 @@
+import requests
 from utilities.style_transfer.StyleContentModel import StyleContentModel
 import time
 import PIL.Image
@@ -15,11 +16,10 @@ def style_transfer(target_link):
     test_image_name = "test_image.jpg"
     final_image_name = "final_image.jpg"
     
-    content_path = keras.utils.get_file(content_image_name, target_link)
     style_path = tf.keras.utils.get_file(
         style_image_name, 'https://raw.githubusercontent.com/nikhil-kamath/neural-style-transfer/main/starry.jpeg')
     
-    content_image = load_img(content_path)
+    content_image = read_tensor_from_image_url(target_link)
     style_image = load_img(style_path)
     
     content_layers = ['block5_conv2']
@@ -81,10 +81,9 @@ def style_transfer(target_link):
     print("Total time: {:.1f}".format(end-start))
     
     tensor_to_image(image).save(dir_filepath + final_image_name)
-        
-        
-
     
+    return dir_filepath + final_image_name
+        
 
 def tensor_to_image(tensor):
     tensor = tensor * 255
@@ -148,3 +147,16 @@ def train_step(image, extractor, opt, **kwargs):
     image.assign(clip_0_1(image))
 
 
+def read_tensor_from_image_url(url,
+                               input_height=299,
+                               input_width=299,
+                               input_mean=0,
+                               input_std=255):
+    image_reader = tf.image.decode_jpeg(
+        requests.get(url).content, channels=3, name="jpeg_reader")
+    float_caster = tf.cast(image_reader, tf.float32)
+    dims_expander = tf.expand_dims(float_caster, 0)
+    resized = tf.image.resize(
+        dims_expander, [input_height, input_width])
+    normalized = tf.divide(tf.subtract(resized, [input_mean]), [input_std])
+    return normalized

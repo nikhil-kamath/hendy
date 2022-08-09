@@ -110,7 +110,7 @@ class Statements(commands.Cog):
 
         if message.channel.id == self.statements_channel:
             if message.content.startswith('+'):
-                to_add = message.content[1:].strip + '\n'
+                to_add = message.content[1:].strip() + '\n'
                 self.statements.add(to_add)
                 with open(os.path.join(self.res_folder, 'statements.txt'), 'a') as writer:
                     writer.write(to_add)

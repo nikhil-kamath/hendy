@@ -15,6 +15,7 @@ cogs = ['Admins',
         'Statements',
         'Youtube', 
         'Database',
+        'StyleTransfer'
         ]
 for cog in cogs:
     bot.load_extension("cogs.{}".format(cog))

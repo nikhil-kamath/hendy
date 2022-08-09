@@ -44,7 +44,6 @@ def create_table(table_name: str, database: str, data_types: List[Tuple[str, int
         cursor.close()
         connection.close()
         logging.info("closed sql connection")
-
 def create_entry(table_name: str, database: str, data: dict | pd.Series, configuration=None):
     """create an entry in a table
 
