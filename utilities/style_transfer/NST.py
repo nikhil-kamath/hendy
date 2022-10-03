@@ -9,6 +9,8 @@ import keras.utils
 
 os.environ["TFHUB_MODEL_LOAD_FORMAT"] = 'COMPRESSED'
 
+
+
 def style_transfer(target_link):
     dir_filepath = "./resources/neural/style/"
     content_image_name = "input_image.jpeg"
