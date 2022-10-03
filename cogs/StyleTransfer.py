@@ -20,13 +20,17 @@ class StyleTransfer(commands.Cog):
             self.transferring = True
             await ctx.send("processing image!")
             loop = asyncio.get_running_loop()
-            output_directory = await loop.run_in_executor(pool, style_transfer, image_link)
+            try:
+                output_directory = await loop.run_in_executor(pool, style_transfer, image_link)
             
-            with open(output_directory, 'rb') as file:
-                output = discord.File(file)
-                await ctx.send(file=output)
-            
-            self.transferring = False
+                with open(output_directory, 'rb') as file:
+                    output = discord.File(file)
+                    await ctx.send(file=output)
+            except ValueError as error:
+                await ctx.send("sorry, something went wrong with the image file you sent. try a different link")
+                print(error)
+            finally:
+                self.transferring = False
             
 
 

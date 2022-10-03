@@ -53,7 +53,6 @@ def create_entry(table_name: str, database: str, data: dict | pd.Series, configu
         data (_type_): data to create (do not put value for id)
         configuration (_type_, optional): sql connection configuration.
     """
-    print(type(data))
     if configuration is None:
         configuration = default_configuration
     configuration['database'] = database
@@ -124,6 +123,27 @@ def get_row(table_name: str, database: str, column: str, data: str, configuratio
         cursor = connection.cursor(dictionary=True)
         cursor.execute(query)
         result = cursor.fetchone()
+    except mysql.connector.Error as error:
+        logging.error(f"failed to get column: {error}")
+    finally:
+        cursor.close()
+        connection.close()
+        logging.info("sql connection closed")
+        return result
+
+def full_table(table_name: str, database: str, configuration=None):
+    if configuration is None:
+        configuration = default_configuration
+    configuration['database'] = database
+    
+    query = f"SELECT * FROM {table_name}"
+    connection = cursor = None
+    result = None
+    try:
+        connection = mysql.connector.connect(**configuration)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(query)
+        result = cursor.fetchall()
     except mysql.connector.Error as error:
         logging.error(f"failed to get column: {error}")
     finally:

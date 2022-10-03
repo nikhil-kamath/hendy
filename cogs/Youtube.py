@@ -3,13 +3,14 @@ import concurrent.futures
 import logging
 import os
 import random
+import datetime
 
 import config
 import discord
 import pandas as pd
 import utilities.Comments as Comments
 from discord.ext import commands, tasks
-from utilities.Database import create_entry, create_table, get_row, random_rows
+from utilities.Database import create_entry, create_table, get_row, random_rows, full_table
 from utilities.Utilities import save_dataframe_as_pickle
 
 '''
@@ -123,7 +124,17 @@ class Youtube(commands.Cog):
         for _, row in comments.iterrows():
             create_entry(table_name, self.database_name, row)
             
-    
+    @commands.command()
+    async def download(self, ctx):
+        table_name = self.table_prefix + str(ctx.guild.id)
+        table = pd.DataFrame(full_table(table_name, self.database_name))
+        save_name = '{}-{date:%Y-%m-%d-%H-%M-%S}.pkl'.format(table_name, date=datetime.datetime.now())
+        save_path = "./resources/yt/uploads"
+        save_dataframe_as_pickle(save_path, save_name, table)
+        await ctx.send(file=discord.File(os.path.join(save_path, save_name)))
+
+
+        
     
 def setup(bot):  
     bot.add_cog(Youtube(bot))
